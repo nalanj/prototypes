@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-tertiary: #eaeef2;
+            --border: #d0d7de;
+            --text: #1f2328;
+            --text-secondary: #656d76;
+            --text-tertiary: #8c959f;
+            --accent: #0969da;
+            --accent-hover: #0550ae;
+            --status-triage: #8250df;
+            --status-triage-bg: #fbefff;
+            --status-planned: #bf8700;
+            --status-planned-bg: #fff8c5;
+            --status-in-progress: #0969da;
+            --status-in-progress-bg: #ddf4ff;
+            --status-in-review: #bf3989;
+            --status-in-review-bg: #fff0fa;
+            --status-done: #1a7f37;
+            --status-done-bg: #dafbe1;
+            --danger: #cf222e;
+            --label-colors: #8250df, #0969da, #bf3989, #bf8700, #1a7f37, #cf222e, #0a3069, #0550ae;
+            --overlay-bg: rgba(0, 0, 0, 0.5);
+            --radius: 6px;
+            --shadow: 0 3px 12px rgba(0,0,0,0.15);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0d1117;
+                --bg-secondary: #161b22;
+                --bg-tertiary: #21262d;
+                --border: #30363d;
+                --text: #e6edf3;
+                --text-secondary: #8b949e;
+                --text-tertiary: #6e7681;
+                --accent: #58a6ff;
+                --accent-hover: #79c0ff;
+                --status-triage-bg: #2d1f52;
+                --status-planned-bg: #3d2e00;
+                --status-in-progress-bg: #0c2d6b;
+                --status-in-review-bg: #4a1942;
+                --status-done-bg: #0f3a1e;
+                --overlay-bg: rgba(0, 0, 0, 0.7);
+                --shadow: 0 8px 24px rgba(0,0,0,0.4);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .new-issue-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .new-issue-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 0.375rem 2rem 0.375rem 0.75rem;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .filter-select {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+            }
+        }
+
+        .issue-list {
+            padding: 1rem 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .issue-row {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 0.75rem;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .issue-row:hover {
+            background: var(--bg-secondary);
+        }
+
+        .issue-row.child {
+            margin-left: 2rem;
+            border-left: 2px solid var(--border);
+        }
+
+        .collapse-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            transition: background 0.1s;
+        }
+
+        .collapse-btn:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .collapse-btn.hidden {
+            visibility: hidden;
+        }
+
+        .issue-title {
+            font-size: 0.9375rem;
+        }
+
+        .issue-meta {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 0.125rem 0.5rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.15s;
+        }
+
+        .status-badge:hover {
+            opacity: 0.8;
+        }
+
+        .status-triage { background: var(--status-triage-bg); color: var(--status-triage); }
+        .status-planned { background: var(--status-planned-bg); color: var(--status-planned); }
+        .status-in-progress { background: var(--status-in-progress-bg); color: var(--status-in-progress); }
+        .status-in-review { background: var(--status-in-review-bg); color: var(--status-in-review); }
+        .status-done { background: var(--status-done-bg); color: var(--status-done); }
+
+        .assignee {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .assignee.none {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+        }
+
+        .labels {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .label {
+            padding: 0.125rem 0.5rem;
+            border-radius: 2rem;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .label:nth-child(8n+1) { background: #8250df22; color: #8250df; }
+        .label:nth-child(8n+2) { background: #0969da22; color: #0969da; }
+        .label:nth-child(8n+3) { background: #bf398922; color: #bf3989; }
+        .label:nth-child(8n+4) { background: #bf870022; color: #bf8700; }
+        .label:nth-child(8n+5) { background: #1a7f3722; color: #1a7f37; }
+        .label:nth-child(8n+6) { background: #cf222e22; color: #cf222e; }
+        .label:nth-child(8n+7) { background: #0a306922; color: #0a3069; }
+        .label:nth-child(8n+8) { background: #0550ae22; color: #0550ae; }
+
+        .child-list {
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+        }
+
+        .child-list.collapsed {
+            max-height: 0 !important;
+        }
+
+        /* Detail Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: min(600px, 100%);
+            background: var(--bg);
+            border-left: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transform: translateX(100%);
+            transition: transform 0.25s ease-out;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .overlay.open {
+            transform: translateX(0);
+        }
+
+        .overlay-backdrop {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay-bg);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+            z-index: 99;
+        }
+
+        .overlay-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 640px) {
+            .overlay {
+                width: 100%;
+                top: auto;
+                bottom: 0;
+                height: 90vh;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                border-radius: 12px 12px 0 0;
+                transform: translateY(100%);
+            }
+
+            .overlay.open {
+                transform: translateY(0);
+            }
+        }
+
+        .overlay-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .overlay-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius);
+            font-size: 1.25rem;
+        }
+
+        .overlay-close:hover {
+            background: var(--bg-secondary);
+        }
+
+        .overlay-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .overlay-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .overlay-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .overlay-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .overlay-description {
+            line-height: 1.6;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+        }
+
+        .comments {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .comment {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+        }
+
+        .comment-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .comment-text {
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        /* Status Dropdown */
+        .status-dropdown {
+            position: absolute;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            z-index: 50;
+            min-width: 140px;
+            display: none;
+        }
+
+        .status-dropdown.open {
+            display: block;
+        }
+
+        .status-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.1s;
+        }
+
+        .status-dropdown-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .status-dropdown-item .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* Assignee Dropdown */
+        .assignee-dropdown {
+            position: absolute;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            z-index: 50;
+            min-width: 180px;
+            display: none;
+        }
+
+        .assignee-dropdown.open {
+            display: block;
+        }
+
+        .assignee-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.1s;
+        }
+
+        .assignee-option:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Labels Dropdown */
+        .labels-dropdown {
+            position: absolute;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            z-index: 50;
+            min-width: 200px;
+            display: none;
+            padding: 0.5rem;
+        }
+
+        .labels-dropdown.open {
+            display: block;
+        }
+
+        .labels-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            border-radius: 4px;
+            transition: background 0.1s;
+        }
+
+        .labels-dropdown-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .labels-dropdown-item input {
+            accent-color: var(--accent);
+        }
+
+        /* New Issue Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            width: min(500px, 90%);
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.2s;
+        }
+
+        .modal-backdrop.open .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            font-size: 1rem;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.375rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.9375rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group select {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background 0.15s;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Context menu positioning */
+        [data-dropdown] {
+            position: relative;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Issues</h1>
+        <button class="new-issue-btn" onclick="openNewIssueModal()">
+            <span>+</span> New Issue
+        </button>
+    </header>
+
+    <div class="filters">
+        <select class="filter-select" id="filter-status" onchange="render()">
+            <option value="">All Statuses</option>
+            <option value="triage">Triage</option>
+            <option value="planned">Planned</option>
+            <option value="in-progress">In Progress</option>
+            <option value="in-review">In Review</option>
+            <option value="done">Done</option>
+        </select>
+        <select class="filter-select" id="filter-assignee" onchange="render()">
+            <option value="">All Assignees</option>
+        </select>
+        <select class="filter-select" id="filter-label" onchange="render()">
+            <option value="">All Labels</option>
+        </select>
+    </div>
+
+    <div class="issue-list" id="issue-list">
+        <!-- Issues rendered here -->
+    </div>
+
+    <!-- Detail Overlay -->
+    <div class="overlay-backdrop" id="overlay-backdrop" onclick="closeDetail()"></div>
+    <div class="overlay" id="detail-overlay">
+        <div class="overlay-header">
+            <span style="font-size: 0.875rem; color: var(--text-secondary);" id="overlay-id"></span>
+            <button class="overlay-close" onclick="closeDetail()">×</button>
+        </div>
+        <div class="overlay-content">
+            <h2 class="overlay-title" id="overlay-title"></h2>
+            
+            <div class="overlay-section">
+                <div class="overlay-section-title">Status</div>
+                <div id="overlay-status"></div>
+            </div>
+
+            <div class="overlay-section">
+                <div class="overlay-section-title">Assignee</div>
+                <div id="overlay-assignee"></div>
+            </div>
+
+            <div class="overlay-section">
+                <div class="overlay-section-title">Labels</div>
+                <div id="overlay-labels"></div>
+            </div>
+
+            <div class="overlay-section">
+                <div class="overlay-section-title">Description</div>
+                <div class="overlay-description" id="overlay-description"></div>
+            </div>
+
+            <div class="overlay-section">
+                <div class="overlay-section-title">Comments</div>
+                <div class="comments" id="overlay-comments"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Issue Modal -->
+    <div class="modal-backdrop" id="new-issue-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>New Issue</h2>
+                <button class="overlay-close" onclick="closeNewIssueModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="new-issue-form" onsubmit="createIssue(event)">
+                    <div class="form-group">
+                        <label for="issue-title">Title</label>
+                        <input type="text" id="issue-title" required placeholder="Brief description of the issue">
+                    </div>
+                    <div class="form-group">
+                        <label for="issue-description">Description</label>
+                        <textarea id="issue-description" placeholder="Additional details..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="issue-parent">Parent Issue (optional)</label>
+                        <select id="issue-parent">
+                            <option value="">None (top-level)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="issue-status">Status</label>
+                        <select id="issue-status">
+                            <option value="triage">Triage</option>
+                            <option value="planned">Planned</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="in-review">In Review</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="issue-assignee">Assignee</label>
+                        <select id="issue-assignee">
+                            <option value="">Unassigned</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Labels</label>
+                        <div id="issue-labels-checkboxes"></div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeNewIssueModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Issue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const USERS = [
+            { id: 'alex', name: 'Alex Chen', initials: 'AC' },
+            { id: 'jordan', name: 'Jordan Lee', initials: 'JL' },
+            { id: 'sam', name: 'Sam Wilson', initials: 'SW' },
+            { id: 'taylor', name: 'Taylor Kim', initials: 'TK' },
+        ];
+
+        const DEFAULT_LABELS = ['bug', 'feature', 'enhancement', 'docs', 'urgent', 'blocked'];
+
+        const STATUS_MAP = {
+            'triage': { label: 'Triage', class: 'status-triage' },
+            'planned': { label: 'Planned', class: 'status-planned' },
+            'in-progress': { label: 'In Progress', class: 'status-in-progress' },
+            'in-review': { label: 'In Review', class: 'status-in-review' },
+            'done': { label: 'Done', class: 'status-done' },
+        };
+
+        let issues = [];
+        let collapsedIds = new Set();
+        let activeDropdown = null;
+        let selectedIssueId = null;
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        // Load from localStorage
+        function loadState() {
+            const savedIssues = localStorage.getItem('issues');
+            const savedCollapsed = localStorage.getItem('collapsedIds');
+            
+            if (savedIssues) {
+                issues = JSON.parse(savedIssues);
+            } else {
+                // Sample data
+                issues = [
+                    {
+                        id: generateId(),
+                        title: 'Implement user authentication',
+                        description: 'Set up OAuth2 flow with support for GitHub and Google providers. Include session management and secure token storage.',
+                        status: 'done',
+                        assigneeId: 'alex',
+                        labels: ['feature'],
+                        comments: [
+                            { author: 'Alex Chen', text: 'Started working on this. Should have a PR ready by Friday.' },
+                            { author: 'Jordan Lee', text: 'Great, let me know if you need help with the OAuth callback handling.' },
+                        ],
+                        children: [
+                            {
+                                id: generateId(),
+                                title: 'Set up OAuth2 providers',
+                                description: 'Configure GitHub and Google OAuth apps.',
+                                status: 'done',
+                                assigneeId: 'alex',
+                                labels: ['feature'],
+                                comments: [],
+                            },
+                            {
+                                id: generateId(),
+                                title: 'Add session management',
+                                description: 'Implement secure session handling with refresh tokens.',
+                                status: 'done',
+                                assigneeId: 'jordan',
+                                labels: ['feature', 'urgent'],
+                                comments: [],
+                            },
+                        ],
+                    },
+                    {
+                        id: generateId(),
+                        title: 'Fix mobile navigation overflow',
+                        description: 'Navigation menu items overflow on screens narrower than 375px. Need to add hamburger menu for small viewports.',
+                        status: 'in-progress',
+                        assigneeId: 'sam',
+                        labels: ['bug', 'urgent'],
+                        comments: [
+                            { author: 'Sam Wilson', text: 'Reproduced on iPhone SE. The issue is with flexbox shrinking.' },
+                        ],
+                        children: [],
+                    },
+                    {
+                        id: generateId(),
+                        title: 'Update API documentation',
+                        description: 'Document the new v2 endpoints and deprecation notices for v1.',
+                        status: 'planned',
+                        assigneeId: 'taylor',
+                        labels: ['docs'],
+                        comments: [],
+                        children: [],
+                    },
+                    {
+                        id: generateId(),
+                        title: 'Performance optimization',
+                        description: 'Profile and optimize slow database queries on the dashboard page.',
+                        status: 'triage',
+                        assigneeId: '',
+                        labels: ['enhancement'],
+                        comments: [],
+                        children: [],
+                    },
+                ];
+            }
+            
+            if (savedCollapsed) {
+                collapsedIds = new Set(JSON.parse(savedCollapsed));
+            }
+
+            updateFilters();
+        }
+
+        // Save to localStorage
+        function saveState() {
+            localStorage.setItem('issues', JSON.stringify(issues));
+            localStorage.setItem('collapsedIds', JSON.stringify([...collapsedIds]));
+        }
+
+        // Get user by ID
+        function getUser(userId) {
+            return USERS.find(u => u.id === userId);
+        }
+
+        // Update filter dropdowns
+        function updateFilters() {
+            const assigneeSelect = document.getElementById('filter-assignee');
+            const labelSelect = document.getElementById('filter-label');
+            const parentSelect = document.getElementById('issue-parent');
+            const assigneeIssueSelect = document.getElementById('issue-assignee');
+
+            // Get unique assignees and labels
+            const assignees = new Set();
+            const labels = new Set();
+            const parents = [];
+
+            function collectData(issueList) {
+                issueList.forEach(issue => {
+                    if (issue.assigneeId) assignees.add(issue.assigneeId);
+                    issue.labels.forEach(l => labels.add(l));
+                    parents.push({ id: issue.id, title: issue.title });
+                    if (issue.children) collectData(issue.children);
+                });
+            }
+            collectData(issues);
+
+            // Update assignee filter
+            assigneeSelect.innerHTML = '<option value="">All Assignees</option>';
+            assignees.forEach(id => {
+                const user = getUser(id);
+                if (user) {
+                    assigneeSelect.innerHTML += `<option value="${id}">${user.name}</option>`;
+                }
+            });
+
+            // Update label filter
+            labelSelect.innerHTML = '<option value="">All Labels</option>';
+            labels.forEach(label => {
+                labelSelect.innerHTML += `<option value="${label}">${label}</option>`;
+            });
+
+            // Update parent select in new issue modal
+            parentSelect.innerHTML = '<option value="">None (top-level)</option>';
+            parents.forEach(p => {
+                parentSelect.innerHTML += `<option value="${p.id}">${p.title}</option>`;
+            });
+
+            // Update assignee select in new issue modal
+            assigneeIssueSelect.innerHTML = '<option value="">Unassigned</option>';
+            USERS.forEach(user => {
+                assigneeIssueSelect.innerHTML += `<option value="${user.id}">${user.name}</option>`;
+            });
+
+            // Update labels checkboxes in new issue modal
+            const labelsContainer = document.getElementById('issue-labels-checkboxes');
+            labelsContainer.innerHTML = DEFAULT_LABELS.map(label => `
+                <label class="labels-dropdown-item">
+                    <input type="checkbox" name="labels" value="${label}">
+                    <span class="label">${label}</span>
+                </label>
+            `).join('');
+        }
+
+        // Filter issues
+        function filterIssues(issueList) {
+            const statusFilter = document.getElementById('filter-status').value;
+            const assigneeFilter = document.getElementById('filter-assignee').value;
+            const labelFilter = document.getElementById('filter-label').value;
+
+            return issueList.filter(issue => {
+                if (statusFilter && issue.status !== statusFilter) return false;
+                if (assigneeFilter && issue.assigneeId !== assigneeFilter) return false;
+                if (labelFilter && !issue.labels.includes(labelFilter)) return false;
+                return true;
+            }).map(issue => {
+                // Filter children recursively
+                const filteredChildren = issue.children ? filterIssues(issue.children) : [];
+                return { ...issue, children: filteredChildren };
+            }).filter(issue => {
+                // Include parent if it matches OR if any child matches
+                const parentMatches = !statusFilter && !assigneeFilter && !labelFilter ||
+                    (statusFilter && issue.status === statusFilter) ||
+                    (assigneeFilter && issue.assigneeId === assigneeFilter) ||
+                    (labelFilter && issue.labels.includes(labelFilter));
+                
+                const childMatches = issue.children && issue.children.length > 0;
+                
+                return parentMatches || childMatches;
+            });
+        }
+
+        // Render issue list
+        function render() {
+            const container = document.getElementById('issue-list');
+            const filtered = filterIssues(issues);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>No issues found</p>
+                        <button class="btn btn-primary" onclick="openNewIssueModal()">Create your first issue</button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(issue => renderIssue(issue)).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.collapse-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleCollapse(btn.dataset.id);
+                });
+            });
+
+            document.querySelectorAll('.issue-row').forEach(row => {
+                row.addEventListener('click', () => openDetail(row.dataset.id));
+            });
+        }
+
+        function renderIssue(issue) {
+            const hasChildren = issue.children && issue.children.length > 0;
+            const isCollapsed = collapsedIds.has(issue.id);
+            const user = getUser(issue.assigneeId);
+            const status = STATUS_MAP[issue.status];
+
+            let html = `
+                <div class="issue-row" data-id="${issue.id}">
+                    <button class="collapse-btn ${hasChildren ? '' : 'hidden'}" data-id="${issue.id}">
+                        ${isCollapsed ? '▶' : '▼'}
+                    </button>
+                    <span class="issue-title">${escapeHtml(issue.title)}</span>
+                    <div class="issue-meta">
+                        <div data-dropdown="status" style="position: relative;">
+                            <button class="status-badge ${status.class}" data-issue="${issue.id}" onclick="event.stopPropagation(); openStatusDropdown('${issue.id}', this)">
+                                ${status.label}
+                            </button>
+                            <div class="status-dropdown" id="status-dropdown-${issue.id}">
+                                ${Object.entries(STATUS_MAP).map(([key, val]) => `
+                                    <div class="status-dropdown-item" onclick="event.stopPropagation(); setStatus('${issue.id}', '${key}')">
+                                        <span class="dot" style="background: var(--status-${key})"></span>
+                                        ${val.label}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div data-dropdown="assignee" style="position: relative;">
+                            <div class="assignee ${user ? '' : 'none'}" onclick="event.stopPropagation(); openAssigneeDropdown('${issue.id}', this)">
+                                ${user ? user.initials : '+'}
+                            </div>
+                            <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
+                                <div class="assignee-option" onclick="event.stopPropagation(); setAssignee('${issue.id}', '')">
+                                    <div class="assignee none">+</div>
+                                    Unassigned
+                                </div>
+                                ${USERS.map(u => `
+                                    <div class="assignee-option" onclick="event.stopPropagation(); setAssignee('${issue.id}', '${u.id}')">
+                                        <div class="assignee">${u.initials}</div>
+                                        ${u.name}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div data-dropdown="labels" style="position: relative;">
+                            <div class="labels" onclick="event.stopPropagation(); openLabelsDropdown('${issue.id}', this)">
+                                ${issue.labels.map(l => `<span class="label">${escapeHtml(l)}</span>`).join('')}
+                            </div>
+                            <div class="labels-dropdown" id="labels-dropdown-${issue.id}">
+                                ${DEFAULT_LABELS.map(label => `
+                                    <label class="labels-dropdown-item">
+                                        <input type="checkbox" value="${label}" ${issue.labels.includes(label) ? 'checked' : ''} onchange="event.stopPropagation(); toggleLabel('${issue.id}', '${label}')">
+                                        <span class="label">${escapeHtml(label)}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (hasChildren) {
+                const childHtml = issue.children.map(child => renderIssue(child)).join('');
+                html += `
+                    <div class="child-list ${isCollapsed ? 'collapsed' : ''}" id="children-${issue.id}" style="max-height: ${isCollapsed ? 0 : '1000px'}">
+                        ${childHtml}
+                    </div>
+                `;
+            }
+
+            return html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Toggle collapse state
+        function toggleCollapse(id) {
+            if (collapsedIds.has(id)) {
+                collapsedIds.delete(id);
+            } else {
+                collapsedIds.add(id);
+            }
+            saveState();
+            render();
+        }
+
+        // Dropdown handlers
+        function openStatusDropdown(issueId, btn) {
+            closeAllDropdowns();
+            const dropdown = document.getElementById(`status-dropdown-${issueId}`);
+            const rect = btn.getBoundingClientRect();
+            dropdown.style.left = '0';
+            dropdown.style.top = `${rect.bottom + 4}px`;
+            dropdown.classList.add('open');
+            activeDropdown = dropdown;
+        }
+
+        function openAssigneeDropdown(issueId, el) {
+            closeAllDropdowns();
+            const dropdown = document.getElementById(`assignee-dropdown-${issueId}`);
+            const rect = el.getBoundingClientRect();
+            dropdown.style.left = '0';
+            dropdown.style.top = `${rect.bottom + 4}px`;
+            dropdown.classList.add('open');
+            activeDropdown = dropdown;
+        }
+
+        function openLabelsDropdown(issueId, el) {
+            closeAllDropdowns();
+            const dropdown = document.getElementById(`labels-dropdown-${issueId}`);
+            const rect = el.getBoundingClientRect();
+            dropdown.style.left = '0';
+            dropdown.style.top = `${rect.bottom + 4}px`;
+            dropdown.classList.add('open');
+            activeDropdown = dropdown;
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.status-dropdown, .assignee-dropdown, .labels-dropdown').forEach(d => {
+                d.classList.remove('open');
+            });
+            activeDropdown = null;
+        }
+
+        // Set status
+        function setStatus(issueId, status) {
+            updateIssue(issueId, { status });
+            closeAllDropdowns();
+        }
+
+        // Set assignee
+        function setAssignee(issueId, assigneeId) {
+            updateIssue(issueId, { assigneeId });
+            closeAllDropdowns();
+        }
+
+        // Toggle label
+        function toggleLabel(issueId, label) {
+            const issue = findIssue(issueId);
+            if (!issue) return;
+
+            const idx = issue.labels.indexOf(label);
+            if (idx >= 0) {
+                issue.labels.splice(idx, 1);
+            } else {
+                issue.labels.push(label);
+            }
+            saveState();
+            render();
+            updateFilters();
+        }
+
+        // Find issue by ID (recursive)
+        function findIssue(id, list = issues) {
+            for (const issue of list) {
+                if (issue.id === id) return issue;
+                if (issue.children) {
+                    const found = findIssue(id, issue.children);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        // Update issue
+        function updateIssue(id, updates) {
+            const issue = findIssue(id);
+            if (issue) {
+                Object.assign(issue, updates);
+                saveState();
+                render();
+                updateFilters();
+            }
+        }
+
+        // Open detail overlay
+        function openDetail(id) {
+            selectedIssueId = id;
+            const issue = findIssue(id);
+            if (!issue) return;
+
+            const status = STATUS_MAP[issue.status];
+            const user = getUser(issue.assigneeId);
+
+            document.getElementById('overlay-id').textContent = `#${id}`;
+            document.getElementById('overlay-title').textContent = issue.title;
+            document.getElementById('overlay-description').textContent = issue.description || 'No description provided.';
+
+            document.getElementById('overlay-status').innerHTML = `
+                <div data-dropdown="status" style="position: relative;">
+                    <button class="status-badge ${status.class}" onclick="openStatusDropdown('${issue.id}', this)">
+                        ${status.label}
+                    </button>
+                    <div class="status-dropdown" id="status-dropdown-${issue.id}">
+                        ${Object.entries(STATUS_MAP).map(([key, val]) => `
+                            <div class="status-dropdown-item" onclick="setStatus('${issue.id}', '${key}')">
+                                <span class="dot" style="background: var(--status-${key})"></span>
+                                ${val.label}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('overlay-assignee').innerHTML = `
+                <div data-dropdown="assignee" style="position: relative;">
+                    <div class="assignee ${user ? '' : 'none'}" onclick="openAssigneeDropdown('${issue.id}', this)">
+                        ${user ? user.initials : 'Unassigned'}
+                    </div>
+                    <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
+                        <div class="assignee-option" onclick="setAssignee('${issue.id}', '')">
+                            <div class="assignee none">+</div>
+                            Unassigned
+                        </div>
+                        ${USERS.map(u => `
+                            <div class="assignee-option" onclick="setAssignee('${issue.id}', '${u.id}')">
+                                <div class="assignee">${u.initials}</div>
+                                ${u.name}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('overlay-labels').innerHTML = `
+                <div class="labels">
+                    ${issue.labels.map(l => `<span class="label">${escapeHtml(l)}</span>`).join('') || '<span style="color: var(--text-secondary);">None</span>'}
+                </div>
+            `;
+
+            document.getElementById('overlay-comments').innerHTML = issue.comments.length > 0
+                ? issue.comments.map(c => `
+                    <div class="comment">
+                        <div class="comment-meta">
+                            <span style="font-weight: 500;">${escapeHtml(c.author)}</span>
+                        </div>
+                        <div class="comment-text">${escapeHtml(c.text)}</div>
+                    </div>
+                `).join('')
+                : '<p style="color: var(--text-secondary);">No comments yet.</p>';
+
+            document.getElementById('overlay-backdrop').classList.add('open');
+            document.getElementById('detail-overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDetail() {
+            selectedIssueId = null;
+            document.getElementById('overlay-backdrop').classList.remove('open');
+            document.getElementById('detail-overlay').classList.remove('open');
+            document.body.style.overflow = '';
+            closeAllDropdowns();
+        }
+
+        // New issue modal
+        function openNewIssueModal() {
+            document.getElementById('new-issue-modal').classList.add('open');
+            document.getElementById('issue-title').focus();
+            document.body.style.overflow = 'hidden';
+            updateFilters();
+        }
+
+        function closeNewIssueModal() {
+            document.getElementById('new-issue-modal').classList.remove('open');
+            document.getElementById('new-issue-form').reset();
+            document.body.style.overflow = '';
+        }
+
+        function createIssue(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('issue-title').value.trim();
+            const description = document.getElementById('issue-description').value.trim();
+            const parentId = document.getElementById('issue-parent').value;
+            const status = document.getElementById('issue-status').value;
+            const assigneeId = document.getElementById('issue-assignee').value;
+
+            const labels = [];
+            document.querySelectorAll('#issue-labels-checkboxes input:checked').forEach(cb => {
+                labels.push(cb.value);
+            });
+
+            const newIssue = {
+                id: generateId(),
+                title,
+                description,
+                status,
+                assigneeId,
+                labels,
+                comments: [],
+                children: [],
+            };
+
+            if (parentId) {
+                const parent = findIssue(parentId);
+                if (parent) {
+                    parent.children.push(newIssue);
+                }
+            } else {
+                issues.unshift(newIssue);
+            }
+
+            saveState();
+            render();
+            updateFilters();
+            closeNewIssueModal();
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (activeDropdown && !activeDropdown.contains(e.target) && !e.target.closest('[data-dropdown]')) {
+                closeAllDropdowns();
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (document.getElementById('new-issue-modal').classList.contains('open')) {
+                    closeNewIssueModal();
+                } else if (selectedIssueId) {
+                    closeDetail();
+                }
+                closeAllDropdowns();
+            }
+        });
+
+        // Initialize
+        loadState();
+        render();
+    </script>
+</body>
+</html>
