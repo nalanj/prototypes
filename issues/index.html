@@ -1233,8 +1233,13 @@
             closeAllDropdowns();
             const dropdown = document.getElementById(`status-dropdown-${issueId}`);
             const rect = btn.getBoundingClientRect();
-            dropdown.style.left = '0';
-            dropdown.style.top = `${rect.bottom + 4}px`;
+            if (isMobile()) {
+                dropdown.style.left = `${rect.left}px`;
+                dropdown.style.top = `${rect.bottom + 4}px`;
+            } else {
+                dropdown.style.left = '0';
+                dropdown.style.top = `${rect.bottom + 4}px`;
+            }
             dropdown.classList.add('open');
             activeDropdown = dropdown;
         }
@@ -1243,8 +1248,13 @@
             closeAllDropdowns();
             const dropdown = document.getElementById(`assignee-dropdown-${issueId}`);
             const rect = el.getBoundingClientRect();
-            dropdown.style.left = '0';
-            dropdown.style.top = `${rect.bottom + 4}px`;
+            if (isMobile()) {
+                dropdown.style.left = `${rect.left}px`;
+                dropdown.style.top = `${rect.bottom + 4}px`;
+            } else {
+                dropdown.style.left = '0';
+                dropdown.style.top = `${rect.bottom + 4}px`;
+            }
             dropdown.classList.add('open');
             activeDropdown = dropdown;
         }
@@ -1253,8 +1263,13 @@
             closeAllDropdowns();
             const dropdown = document.getElementById(`labels-dropdown-${issueId}`);
             const rect = el.getBoundingClientRect();
-            dropdown.style.left = '0';
-            dropdown.style.top = `${rect.bottom + 4}px`;
+            if (isMobile()) {
+                dropdown.style.left = `${rect.left}px`;
+                dropdown.style.top = `${rect.bottom + 4}px`;
+            } else {
+                dropdown.style.left = '0';
+                dropdown.style.top = `${rect.bottom + 4}px`;
+            }
             dropdown.classList.add('open');
             activeDropdown = dropdown;
         }
@@ -1461,6 +1476,10 @@
         // Check if we're on desktop
         function isDesktop() {
             return window.innerWidth > 640;
+        }
+
+        function isMobile() {
+            return window.innerWidth <= 640;
         }
 
         // Open overlay with focus on a specific field
