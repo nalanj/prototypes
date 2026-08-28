@@ -1089,36 +1089,34 @@
                         ${isCollapsed ? '▶' : '▼'}
                     </button>
                     <span class="issue-title">${escapeHtml(issue.title)}</span>
-                    <div class="issue-meta">
-                        <div data-dropdown="assignee" style="position: relative;">
-                            <div class="assignee ${user ? '' : 'none'}" onclick="event.stopPropagation(); openAssigneeDropdown('${issue.id}', this)">
-                                ${user ? user.initials : '+'}
-                            </div>
-                            <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
-                                <div class="assignee-option" onclick="event.stopPropagation(); setAssignee('${issue.id}', '')">
-                                    <div class="assignee none">+</div>
-                                    Unassigned
-                                </div>
-                                ${USERS.map(u => `
-                                    <div class="assignee-option" onclick="event.stopPropagation(); setAssignee('${issue.id}', '${u.id}')">
-                                        <div class="assignee">${u.initials}</div>
-                                        ${u.name}
-                                    </div>
-                                `).join('')}
-                            </div>
+                    <div data-dropdown="labels" style="position: relative;">
+                        <div class="labels" onclick="event.stopPropagation(); openLabelsDropdown('${issue.id}', this)">
+                            ${issue.labels.map(l => `<span class="label">${escapeHtml(l)}</span>`).join('')}
                         </div>
-                        <div data-dropdown="labels" style="position: relative;">
-                            <div class="labels" onclick="event.stopPropagation(); openLabelsDropdown('${issue.id}', this)">
-                                ${issue.labels.map(l => `<span class="label">${escapeHtml(l)}</span>`).join('')}
+                        <div class="labels-dropdown" id="labels-dropdown-${issue.id}">
+                            ${DEFAULT_LABELS.map(label => `
+                                <label class="labels-dropdown-item">
+                                    <input type="checkbox" value="${label}" ${issue.labels.includes(label) ? 'checked' : ''} onchange="event.stopPropagation(); toggleLabel('${issue.id}', '${label}')">
+                                    <span class="label">${escapeHtml(label)}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div data-dropdown="assignee" style="position: relative;">
+                        <div class="assignee ${user ? '' : 'none'}" onclick="event.stopPropagation(); openAssigneeDropdown('${issue.id}', this)">
+                            ${user ? user.initials : '+'}
+                        </div>
+                        <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
+                            <div class="assignee-option" onclick="event.stopPropagation(); setAssignee('${issue.id}', '')">
+                                <div class="assignee none">+</div>
+                                Unassigned
                             </div>
-                            <div class="labels-dropdown" id="labels-dropdown-${issue.id}">
-                                ${DEFAULT_LABELS.map(label => `
-                                    <label class="labels-dropdown-item">
-                                        <input type="checkbox" value="${label}" ${issue.labels.includes(label) ? 'checked' : ''} onchange="event.stopPropagation(); toggleLabel('${issue.id}', '${label}')">
-                                        <span class="label">${escapeHtml(label)}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
+                            ${USERS.map(u => `
+                                <div class="assignee-option" onclick="event.stopPropagation(); setAssignee('${issue.id}', '${u.id}')">
+                                    <div class="assignee">${u.initials}</div>
+                                    ${u.name}
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 </div>
