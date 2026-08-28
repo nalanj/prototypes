@@ -1162,14 +1162,14 @@
             });
         }
 
-        function renderIssue(issue) {
+        function renderIssue(issue, isChild = false) {
             const hasChildren = issue.children && issue.children.length > 0;
             const isCollapsed = collapsedIds.has(issue.id);
             const user = getUser(issue.assigneeId);
             const status = STATUS_MAP[issue.status];
 
             let html = `
-                <div class="issue-row" data-id="${issue.id}">
+                <div class="issue-row${isChild ? ' child' : ''}" data-id="${issue.id}">
                     <div data-dropdown="status" style="position: relative;">
                         <button class="status-icon ${status.iconClass}" onclick="event.stopPropagation(); openStatusDropdown('${issue.id}', this)" title="${status.label}">
                             ${STATUS_ICONS[issue.status]}
@@ -1221,7 +1221,7 @@
             `;
 
             if (hasChildren) {
-                const childHtml = issue.children.map(child => renderIssue(child)).join('');
+                const childHtml = issue.children.map(child => renderIssue(child, true)).join('');
                 html += `
                     <div class="child-list ${isCollapsed ? 'collapsed' : ''}" id="children-${issue.id}" style="max-height: ${isCollapsed ? 0 : '1000px'}">
                         ${childHtml}
