@@ -263,7 +263,12 @@
         .assignee.none {
             background: var(--bg-tertiary);
             color: var(--text-secondary);
-            font-size: 1rem;
+        }
+
+        .assignee.none::after {
+            content: '+';
+            font-size: 1.1rem;
+            font-weight: 300;
         }
 
         .labels {
@@ -1185,7 +1190,7 @@
                         </div>
                         <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
                             <div class="assignee-option" onclick="event.stopPropagation(); setAssignee('${issue.id}', '')">
-                                <div class="assignee none">+</div>
+                                <div class="assignee none"></div>
                                 Unassigned
                             </div>
                             ${USERS.map(u => `
@@ -1386,11 +1391,11 @@
             document.getElementById('overlay-assignee').innerHTML = `
                 <div data-dropdown="assignee" style="position: relative;">
                     <div class="assignee ${user ? '' : 'none'}" style="${user ? `background: ${user.color}` : ''}" onclick="openAssigneeDropdown('${issue.id}', this)">
-                        ${user ? user.initials : 'Unassigned'}
+                        ${user ? user.initials : ''}
                     </div>
                     <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
                         <div class="assignee-option" onclick="setAssignee('${issue.id}', '')">
-                            <div class="assignee none">+</div>
+                            <div class="assignee none"></div>
                             Unassigned
                         </div>
                         ${USERS.map(u => `
@@ -1536,11 +1541,11 @@
             document.getElementById('overlay-assignee').innerHTML = `
                 <div data-dropdown="assignee" style="position: relative;">
                     <div class="assignee ${user ? '' : 'none'}" style="${user ? `background: ${user.color}` : ''}" onclick="openAssigneeDropdown('${issue.id}', this)">
-                        ${user ? user.initials : 'Unassigned'}
+                        ${user ? user.initials : ''}
                     </div>
                     <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
                         <div class="assignee-option" onclick="setAssignee('${issue.id}', '')">
-                            <div class="assignee none">+</div>
+                            <div class="assignee none"></div>
                             Unassigned
                         </div>
                         ${USERS.map(u => `
