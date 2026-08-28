@@ -357,6 +357,13 @@
                 display: none;
             }
 
+            .status-dropdown,
+            .assignee-dropdown,
+            .labels-dropdown {
+                position: fixed !important;
+                z-index: 1000 !important;
+            }
+
             .status-icon {
                 width: 28px;
                 height: 28px;
@@ -1450,6 +1457,99 @@
                 closeAllDropdowns();
             }
         });
+
+        // Check if we're on desktop
+        function isDesktop() {
+            return window.innerWidth > 640;
+        }
+
+        // Open overlay with focus on a specific field
+        function openDetailWithFocus(id, focusField) {
+            selectedIssueId = id;
+            const issue = findIssue(id);
+            if (!issue) return;
+
+            const status = STATUS_MAP[issue.status];
+            const user = getUser(issue.assigneeId);
+
+            document.getElementById('overlay-id').textContent = `#${id}`;
+            document.getElementById('overlay-title').textContent = issue.title;
+            document.getElementById('overlay-description').textContent = issue.description || 'No description provided.';
+
+            document.getElementById('overlay-status').innerHTML = `
+                <div data-dropdown="status" style="position: relative;">
+                    <button class="status-badge ${status.class}" onclick="openStatusDropdown('${issue.id}', this)">
+                        ${STATUS_ICONS[issue.status]}
+                        ${status.label}
+                    </button>
+                    <div class="status-dropdown" id="status-dropdown-${issue.id}">
+                        ${Object.entries(STATUS_MAP).map(([key, val]) => `
+                            <div class="status-dropdown-item" onclick="setStatus('${issue.id}', '${key}')">
+                                <span class="dot" style="background: var(--status-${key})"></span>
+                                ${val.label}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('overlay-assignee').innerHTML = `
+                <div data-dropdown="assignee" style="position: relative;">
+                    <div class="assignee ${user ? '' : 'none'}" style="${user ? `background: ${user.color}` : ''}" onclick="openAssigneeDropdown('${issue.id}', this)">
+                        ${user ? user.initials : 'Unassigned'}
+                    </div>
+                    <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
+                        <div class="assignee-option" onclick="setAssignee('${issue.id}', '')">
+                            <div class="assignee none">+</div>
+                            Unassigned
+                        </div>
+                        ${USERS.map(u => `
+                            <div class="assignee-option" onclick="setAssignee('${issue.id}', '${u.id}')">
+                                <div class="assignee" style="background: ${u.color}">${u.initials}</div>
+                                ${u.name}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('overlay-labels').innerHTML = `
+                <div class="labels" style="cursor: pointer;" onclick="openLabelsDropdown('${issue.id}', this)">
+                    ${issue.labels.map(l => `<span class="label">${escapeHtml(l)}</span>`).join('') || '<span style="color: var(--text-secondary);">None</span>'}
+                </div>
+                <div class="labels-dropdown" id="labels-dropdown-${issue.id}">
+                    ${DEFAULT_LABELS.map(label => `
+                        <label class="labels-dropdown-item">
+                            <input type="checkbox" value="${label}" ${issue.labels.includes(label) ? 'checked' : ''} onchange="toggleLabel('${issue.id}', '${label}')">
+                            <span class="label">${escapeHtml(label)}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('overlay-comments').innerHTML = issue.comments.length > 0
+                ? issue.comments.map(c => `
+                    <div class="comment">
+                        <div class="comment-meta">
+                            <span style="font-weight: 500;">${escapeHtml(c.author)}</span>
+                        </div>
+                        <div class="comment-text">${escapeHtml(c.text)}</div>
+                    </div>
+                `).join('')
+                : '<p style="color: var(--text-secondary);">No comments yet.</p>';
+
+            document.getElementById('overlay-backdrop').classList.add('open');
+            document.getElementById('detail-overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+
+            // Open the relevant dropdown on desktop
+            if (isDesktop() && focusField) {
+                setTimeout(() => {
+                    const btn = document.querySelector(`#overlay-${focusField} [data-dropdown] button, #overlay-${focusField} [data-dropdown] > div:last-child`);
+                    if (btn) btn.click();
+                }, 100);
+            }
+        }
 
         // Close on Escape
         document.addEventListener('keydown', (e) => {
