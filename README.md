@@ -4,7 +4,7 @@ HTML prototypes for new product ideas.
 
 ## Prototypes
 
-- [Issues](/prototypes/issues/) - Simple issue tracking with nested issues, inline editing, and localStorage persistence
+- [Issues](/prototypes/issues.html) - Simple issue tracking with nested issues, inline editing, and localStorage persistence
 
 ## Structure
 
