@@ -236,11 +236,11 @@
         .status-in-review { background: var(--status-in-review-bg); color: var(--status-in-review); }
         .status-done { background: var(--status-done-bg); color: var(--status-done); }
 
-        .status-icon-triage { background: var(--status-triage-bg); }
-        .status-icon-planned { background: var(--status-planned-bg); }
-        .status-icon-in-progress { background: var(--status-in-progress-bg); }
-        .status-icon-in-review { background: var(--status-in-review-bg); }
-        .status-icon-done { background: var(--status-done-bg); }
+        .status-icon-triage { background: var(--status-triage-bg); color: var(--status-triage); }
+        .status-icon-planned { background: var(--status-planned-bg); color: var(--status-planned); }
+        .status-icon-in-progress { background: var(--status-in-progress-bg); color: var(--status-in-progress); }
+        .status-icon-in-review { background: var(--status-in-review-bg); color: var(--status-in-review); }
+        .status-icon-done { background: var(--status-done-bg); color: var(--status-done); }
 
         .assignee {
             width: 28px;
@@ -799,11 +799,11 @@
         const DEFAULT_LABELS = ['bug', 'feature', 'enhancement', 'docs', 'urgent', 'blocked'];
 
         const STATUS_ICONS = {
-            triage: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a4.5 4.5 0 0 0-4.5 4.5c0 1.62.86 3.02 2.13 3.82L5 10.5a.5.5 0 0 0 .6.6l1.08-1.23A5.5 5.5 0 1 0 8 1zM6.5 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm.5 3.5h1v1h-1v-1z"/></svg>`,
-            planned: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>`,
-            'in-progress': `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2v14l11-7-11-7z"/></svg>`,
-            'in-review': `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>`,
-            done: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>`,
+            triage: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5" stroke-dasharray="2 2"/></svg>`,
+            planned: `<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6"/></svg>`,
+            'in-progress': `<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="currentColor" opacity="0.4"/><path d="M8 2a6 6 0 0 1 6 6v0a6 6 0 0 1-6 6z" fill="currentColor"/></svg>`,
+            'in-review': `<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6"/></svg>`,
+            done: `<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6"/><path d="M5.5 8l2 2 3-3.5" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
         };
 
         const STATUS_MAP = {
