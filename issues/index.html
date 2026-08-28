@@ -155,23 +155,24 @@
         }
 
         .status-icon {
-            width: 20px;
-            height: 20px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
+            border-radius: 50%;
             cursor: pointer;
-            transition: background 0.1s;
+            transition: transform 0.1s;
+            background: transparent;
         }
 
         .status-icon:hover {
-            background: var(--bg-tertiary);
+            transform: scale(1.1);
         }
 
         .status-icon svg {
-            width: 16px;
-            height: 16px;
+            width: 22px;
+            height: 22px;
         }
 
         .status-icon-triage { color: var(--status-triage); }
@@ -236,11 +237,11 @@
         .status-in-review { background: var(--status-in-review-bg); color: var(--status-in-review); }
         .status-done { background: var(--status-done-bg); color: var(--status-done); }
 
-        .status-icon-triage { background: var(--status-triage-bg); color: var(--status-triage); }
-        .status-icon-planned { background: var(--status-planned-bg); color: var(--status-planned); }
-        .status-icon-in-progress { background: var(--status-in-progress-bg); color: var(--status-in-progress); }
-        .status-icon-in-review { background: var(--status-in-review-bg); color: var(--status-in-review); }
-        .status-icon-done { background: var(--status-done-bg); color: var(--status-done); }
+        .status-icon-triage { color: var(--status-triage); }
+        .status-icon-planned { color: var(--status-planned); }
+        .status-icon-in-progress { color: var(--status-in-progress); }
+        .status-icon-in-review { color: var(--status-in-review); }
+        .status-icon-done { color: var(--status-done); }
 
         .assignee {
             width: 28px;
