@@ -136,7 +136,7 @@
 
         .issue-row {
             display: grid;
-            grid-template-columns: auto 1fr auto auto;
+            grid-template-columns: auto auto 1fr auto auto;
             gap: 0.75rem;
             align-items: center;
             padding: 0.75rem 1rem;
@@ -153,6 +153,32 @@
             margin-left: 2rem;
             border-left: 2px solid var(--border);
         }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .status-icon:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .status-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .status-icon-triage { color: var(--status-triage); }
+        .status-icon-planned { color: var(--status-planned); }
+        .status-icon-in-progress { color: var(--status-in-progress); }
+        .status-icon-in-review { color: var(--status-in-review); }
+        .status-icon-done { color: var(--status-done); }
 
         .collapse-btn {
             width: 24px;
@@ -188,6 +214,9 @@
         }
 
         .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
             padding: 0.125rem 0.5rem;
             border-radius: 2rem;
             font-size: 0.75rem;
@@ -206,6 +235,12 @@
         .status-in-progress { background: var(--status-in-progress-bg); color: var(--status-in-progress); }
         .status-in-review { background: var(--status-in-review-bg); color: var(--status-in-review); }
         .status-done { background: var(--status-done-bg); color: var(--status-done); }
+
+        .status-icon-triage { background: var(--status-triage-bg); }
+        .status-icon-planned { background: var(--status-planned-bg); }
+        .status-icon-in-progress { background: var(--status-in-progress-bg); }
+        .status-icon-in-review { background: var(--status-in-review-bg); }
+        .status-icon-done { background: var(--status-done-bg); }
 
         .assignee {
             width: 28px;
@@ -763,12 +798,20 @@
 
         const DEFAULT_LABELS = ['bug', 'feature', 'enhancement', 'docs', 'urgent', 'blocked'];
 
+        const STATUS_ICONS = {
+            triage: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a4.5 4.5 0 0 0-4.5 4.5c0 1.62.86 3.02 2.13 3.82L5 10.5a.5.5 0 0 0 .6.6l1.08-1.23A5.5 5.5 0 1 0 8 1zM6.5 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm.5 3.5h1v1h-1v-1z"/></svg>`,
+            planned: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>`,
+            'in-progress': `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2v14l11-7-11-7z"/></svg>`,
+            'in-review': `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>`,
+            done: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>`,
+        };
+
         const STATUS_MAP = {
-            'triage': { label: 'Triage', class: 'status-triage' },
-            'planned': { label: 'Planned', class: 'status-planned' },
-            'in-progress': { label: 'In Progress', class: 'status-in-progress' },
-            'in-review': { label: 'In Review', class: 'status-in-review' },
-            'done': { label: 'Done', class: 'status-done' },
+            'triage': { label: 'Triage', class: 'status-triage', iconClass: 'status-icon-triage' },
+            'planned': { label: 'Planned', class: 'status-planned', iconClass: 'status-icon-planned' },
+            'in-progress': { label: 'In Progress', class: 'status-in-progress', iconClass: 'status-icon-in-progress' },
+            'in-review': { label: 'In Review', class: 'status-in-review', iconClass: 'status-icon-in-review' },
+            'done': { label: 'Done', class: 'status-done', iconClass: 'status-icon-done' },
         };
 
         let issues = [];
@@ -1001,24 +1044,24 @@
 
             let html = `
                 <div class="issue-row" data-id="${issue.id}">
+                    <div data-dropdown="status" style="position: relative;">
+                        <button class="status-icon ${status.iconClass}" onclick="event.stopPropagation(); openStatusDropdown('${issue.id}', this)" title="${status.label}">
+                            ${STATUS_ICONS[issue.status]}
+                        </button>
+                        <div class="status-dropdown" id="status-dropdown-${issue.id}">
+                            ${Object.entries(STATUS_MAP).map(([key, val]) => `
+                                <div class="status-dropdown-item" onclick="event.stopPropagation(); setStatus('${issue.id}', '${key}')">
+                                    <span class="dot" style="background: var(--status-${key})"></span>
+                                    ${val.label}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
                     <button class="collapse-btn ${hasChildren ? '' : 'hidden'}" data-id="${issue.id}">
                         ${isCollapsed ? '▶' : '▼'}
                     </button>
                     <span class="issue-title">${escapeHtml(issue.title)}</span>
                     <div class="issue-meta">
-                        <div data-dropdown="status" style="position: relative;">
-                            <button class="status-badge ${status.class}" data-issue="${issue.id}" onclick="event.stopPropagation(); openStatusDropdown('${issue.id}', this)">
-                                ${status.label}
-                            </button>
-                            <div class="status-dropdown" id="status-dropdown-${issue.id}">
-                                ${Object.entries(STATUS_MAP).map(([key, val]) => `
-                                    <div class="status-dropdown-item" onclick="event.stopPropagation(); setStatus('${issue.id}', '${key}')">
-                                        <span class="dot" style="background: var(--status-${key})"></span>
-                                        ${val.label}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
                         <div data-dropdown="assignee" style="position: relative;">
                             <div class="assignee ${user ? '' : 'none'}" onclick="event.stopPropagation(); openAssigneeDropdown('${issue.id}', this)">
                                 ${user ? user.initials : '+'}
@@ -1187,6 +1230,7 @@
             document.getElementById('overlay-status').innerHTML = `
                 <div data-dropdown="status" style="position: relative;">
                     <button class="status-badge ${status.class}" onclick="openStatusDropdown('${issue.id}', this)">
+                        ${STATUS_ICONS[issue.status]}
                         ${status.label}
                     </button>
                     <div class="status-dropdown" id="status-dropdown-${issue.id}">
