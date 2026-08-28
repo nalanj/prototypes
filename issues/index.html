@@ -1233,13 +1233,20 @@
             closeAllDropdowns();
             const dropdown = document.getElementById(`status-dropdown-${issueId}`);
             const rect = btn.getBoundingClientRect();
+            let left = rect.left;
+            let top = rect.bottom + 4;
             if (isMobile()) {
-                dropdown.style.left = `${rect.left}px`;
-                dropdown.style.top = `${rect.bottom + 4}px`;
+                // Ensure dropdown stays within viewport
+                const dropdownWidth = 140;
+                if (left + dropdownWidth > window.innerWidth - 16) {
+                    left = window.innerWidth - dropdownWidth - 16;
+                }
+                if (left < 16) left = 16;
             } else {
-                dropdown.style.left = '0';
-                dropdown.style.top = `${rect.bottom + 4}px`;
+                left = 0;
             }
+            dropdown.style.left = `${left}px`;
+            dropdown.style.top = `${top}px`;
             dropdown.classList.add('open');
             activeDropdown = dropdown;
         }
@@ -1248,13 +1255,20 @@
             closeAllDropdowns();
             const dropdown = document.getElementById(`assignee-dropdown-${issueId}`);
             const rect = el.getBoundingClientRect();
+            let left = rect.left;
+            let top = rect.bottom + 4;
             if (isMobile()) {
-                dropdown.style.left = `${rect.left}px`;
-                dropdown.style.top = `${rect.bottom + 4}px`;
+                // Ensure dropdown stays within viewport
+                const dropdownWidth = 180;
+                if (left + dropdownWidth > window.innerWidth - 16) {
+                    left = window.innerWidth - dropdownWidth - 16;
+                }
+                if (left < 16) left = 16;
             } else {
-                dropdown.style.left = '0';
-                dropdown.style.top = `${rect.bottom + 4}px`;
+                left = 0;
             }
+            dropdown.style.left = `${left}px`;
+            dropdown.style.top = `${top}px`;
             dropdown.classList.add('open');
             activeDropdown = dropdown;
         }
@@ -1263,13 +1277,20 @@
             closeAllDropdowns();
             const dropdown = document.getElementById(`labels-dropdown-${issueId}`);
             const rect = el.getBoundingClientRect();
+            let left = rect.left;
+            let top = rect.bottom + 4;
             if (isMobile()) {
-                dropdown.style.left = `${rect.left}px`;
-                dropdown.style.top = `${rect.bottom + 4}px`;
+                // Ensure dropdown stays within viewport
+                const dropdownWidth = 200;
+                if (left + dropdownWidth > window.innerWidth - 16) {
+                    left = window.innerWidth - dropdownWidth - 16;
+                }
+                if (left < 16) left = 16;
             } else {
-                dropdown.style.left = '0';
-                dropdown.style.top = `${rect.bottom + 4}px`;
+                left = 0;
             }
+            dropdown.style.left = `${left}px`;
+            dropdown.style.top = `${top}px`;
             dropdown.classList.add('open');
             activeDropdown = dropdown;
         }
