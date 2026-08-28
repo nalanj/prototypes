@@ -263,12 +263,7 @@
         .assignee.none {
             background: var(--bg-tertiary);
             color: var(--text-secondary);
-        }
-
-        .assignee.none::after {
-            content: '+';
-            font-size: 1.1rem;
-            font-weight: 300;
+            font-size: 1rem;
         }
 
         .labels {
@@ -1190,7 +1185,7 @@
                         </div>
                         <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
                             <div class="assignee-option" onclick="event.stopPropagation(); setAssignee('${issue.id}', '')">
-                                <div class="assignee none"></div>
+                                <div class="assignee none">+</div>
                                 Unassigned
                             </div>
                             ${USERS.map(u => `
@@ -1395,7 +1390,7 @@
                     </div>
                     <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
                         <div class="assignee-option" onclick="setAssignee('${issue.id}', '')">
-                            <div class="assignee none"></div>
+                            <div class="assignee none">+</div>
                             Unassigned
                         </div>
                         ${USERS.map(u => `
@@ -1545,7 +1540,7 @@
                     </div>
                     <div class="assignee-dropdown" id="assignee-dropdown-${issue.id}">
                         <div class="assignee-option" onclick="setAssignee('${issue.id}', '')">
-                            <div class="assignee none"></div>
+                            <div class="assignee none">+</div>
                             Unassigned
                         </div>
                         ${USERS.map(u => `
