@@ -206,6 +206,9 @@
 
         .issue-title {
             font-size: 0.9375rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .issue-meta {
@@ -348,6 +351,10 @@
             .issue-row {
                 padding: 0.5rem;
                 gap: 0.5rem;
+            }
+
+            .issue-row .labels {
+                display: none;
             }
 
             .status-icon {
