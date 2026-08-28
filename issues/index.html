@@ -381,6 +381,21 @@
             .overlay.open {
                 transform: translateY(0);
             }
+
+            .modal {
+                width: 100%;
+                top: auto;
+                bottom: 0;
+                height: 90vh;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                border-radius: 12px 12px 0 0;
+                transform: translateY(100%);
+            }
+
+            .modal-backdrop.open .modal {
+                transform: translateY(0);
+            }
         }
 
         .overlay-header {
@@ -572,13 +587,10 @@
             position: fixed;
             inset: 0;
             background: var(--overlay-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s;
+            transition: opacity 0.25s;
+            z-index: 200;
         }
 
         .modal-backdrop.open {
@@ -587,35 +599,55 @@
         }
 
         .modal {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: min(500px, 100%);
             background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            border-left: 1px solid var(--border);
             box-shadow: var(--shadow);
-            width: min(500px, 90%);
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: scale(0.95);
-            transition: transform 0.2s;
+            transform: translateX(100%);
+            transition: transform 0.25s ease-out;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 201;
         }
 
         .modal-backdrop.open .modal {
-            transform: scale(1);
+            transform: translateX(0);
         }
 
         .modal-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 1rem 1.25rem;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .modal-header h2 {
-            font-size: 1rem;
+            font-size: 1.25rem;
         }
 
         .modal-body {
-            padding: 1.25rem;
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
         }
 
         .form-group {
@@ -636,10 +668,17 @@
             padding: 0.5rem 0.75rem;
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            background: var(--bg);
+            background: var(--bg-secondary);
             color: var(--text);
             font-size: 0.9375rem;
             font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
         .form-group textarea {
@@ -650,13 +689,25 @@
         .form-group select {
             appearance: none;
             cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            padding-right: 2rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .form-group select {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+            }
         }
 
         .form-actions {
             display: flex;
             justify-content: flex-end;
             gap: 0.75rem;
-            margin-top: 1.25rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
         }
 
         .btn {
@@ -772,7 +823,7 @@
     </div>
 
     <!-- New Issue Modal -->
-    <div class="modal-backdrop" id="new-issue-modal">
+    <div class="modal-backdrop" id="new-issue-modal" onclick="if(event.target === this) closeNewIssueModal()">
         <div class="modal">
             <div class="modal-header">
                 <h2>New Issue</h2>
@@ -780,39 +831,41 @@
             </div>
             <div class="modal-body">
                 <form id="new-issue-form" onsubmit="createIssue(event)">
-                    <div class="form-group">
-                        <label for="issue-title">Title</label>
-                        <input type="text" id="issue-title" required placeholder="Brief description of the issue">
+                    <div class="form-section">
+                        <input type="text" id="issue-title" required placeholder="Title" style="width: 100%; padding: 0.75rem; border: none; background: transparent; color: var(--text); font-size: 1.25rem; font-family: inherit; margin-bottom: 1rem;">
                     </div>
-                    <div class="form-group">
-                        <label for="issue-description">Description</label>
-                        <textarea id="issue-description" placeholder="Additional details..."></textarea>
+                    <div class="form-section">
+                        <div class="form-section-title">Description</div>
+                        <textarea id="issue-description" placeholder="Add a description..."></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="issue-parent">Parent Issue (optional)</label>
-                        <select id="issue-parent">
-                            <option value="">None (top-level)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="issue-status">Status</label>
-                        <select id="issue-status">
-                            <option value="triage">Triage</option>
-                            <option value="planned">Planned</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="in-review">In Review</option>
-                            <option value="done">Done</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="issue-assignee">Assignee</label>
-                        <select id="issue-assignee">
-                            <option value="">Unassigned</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Labels</label>
-                        <div id="issue-labels-checkboxes"></div>
+                    <div class="form-section">
+                        <div class="form-section-title">Details</div>
+                        <div class="form-group">
+                            <label for="issue-status">Status</label>
+                            <select id="issue-status">
+                                <option value="triage">Triage</option>
+                                <option value="planned">Planned</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="in-review">In Review</option>
+                                <option value="done">Done</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="issue-assignee">Assignee</label>
+                            <select id="issue-assignee">
+                                <option value="">Unassigned</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="issue-parent">Parent Issue</label>
+                            <select id="issue-parent">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Labels</label>
+                            <div id="issue-labels-checkboxes"></div>
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeNewIssueModal()">Cancel</button>
