@@ -1089,7 +1089,7 @@
             });
 
             // Update parent select in new issue modal
-            parentSelect.innerHTML = '<option value="">None (None (top-level))</option>';
+            parentSelect.innerHTML = '<option value="">None (top-level)</option>';
             parents.forEach(p => {
                 parentSelect.innerHTML += `<option value="${p.id}">${p.title}</option>`;
             });
