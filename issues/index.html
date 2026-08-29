@@ -102,6 +102,37 @@
             background: var(--accent-hover);
         }
 
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-secondary);
+        }
+
+        .filter-modal-select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-secondary);
+            color: var(--text);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            appearance: none;
+            cursor: pointer;
+        }
+
         .filters {
             display: flex;
             gap: 0.75rem;
@@ -812,22 +843,10 @@
     <header class="header">
         <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0;">
             <h1 style="flex-shrink: 0;">Tasks</h1>
-            <div class="filters" style="padding: 0; background: none; border: none; flex-wrap: nowrap; gap: 0.5rem;">
-                <select class="filter-select" id="filter-status" onchange="render()" style="padding: 0.25rem 1.5rem 0.25rem 0.5rem; font-size: 0.8125rem;">
-                    <option value="">All Statuses</option>
-                    <option value="triage">Triage</option>
-                    <option value="planned">Planned</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="in-review">In Review</option>
-                    <option value="done">Done</option>
-                </select>
-                <select class="filter-select" id="filter-assignee" onchange="render()" style="padding: 0.25rem 1.5rem 0.25rem 0.5rem; font-size: 0.8125rem;">
-                    <option value="">All Assignees</option>
-                </select>
-                <select class="filter-select" id="filter-label" onchange="render()" style="padding: 0.25rem 1.5rem 0.25rem 0.5rem; font-size: 0.8125rem;">
-                    <option value="">All Labels</option>
-                </select>
-            </div>
+            <button class="filter-btn" onclick="openFilterModal()">
+                <svg viewBox="0 0 16 16" fill="currentColor" style="width: 16px; height: 16px;"><path d="M9.5 3.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5zM2.5 9.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5zm7 0a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5zm-7 0h14" fill-rule="evenodd"/></svg>
+                Filters
+            </button>
         </div>
         <button class="new-issue-btn" onclick="openNewIssueModal()">
             <span>+</span> New Task
@@ -925,6 +944,45 @@
                         <button type="submit" class="btn btn-primary">Create Task</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div class="modal-backdrop" id="filter-modal" onclick="if(event.target === this) closeFilterModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Filters</h2>
+                <button class="overlay-close" onclick="closeFilterModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-section">
+                    <div class="form-section-title">Status</div>
+                    <select id="filter-status" class="filter-modal-select" onchange="render()">
+                        <option value="">All Statuses</option>
+                        <option value="triage">Triage</option>
+                        <option value="planned">Planned</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="in-review">In Review</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-title">Assignee</div>
+                    <select id="filter-assignee" class="filter-modal-select" onchange="render()">
+                        <option value="">All Assignees</option>
+                    </select>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-title">Label</div>
+                    <select id="filter-label" class="filter-modal-select" onchange="render()">
+                        <option value="">All Labels</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+                    <button type="button" class="btn btn-primary" onclick="closeFilterModal()">Done</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1092,32 +1150,40 @@
             }
             collectData(issues);
 
-            // Update assignee filter
-            assigneeSelect.innerHTML = '<option value="">All Assignees</option>';
+            // Update assignee filter selects (both header and modal)
+            const assigneeOptions = '<option value="">All Assignees</option>';
+            let assigneeHtml = assigneeOptions;
             assignees.forEach(id => {
                 const user = getUser(id);
                 if (user) {
-                    assigneeSelect.innerHTML += `<option value="${id}">${user.name}</option>`;
+                    assigneeHtml += `<option value="${id}">${user.name}</option>`;
                 }
             });
+            if (assigneeSelect) assigneeSelect.innerHTML = assigneeHtml;
 
-            // Update label filter
-            labelSelect.innerHTML = '<option value="">All Labels</option>';
+            // Update label filter selects (both header and modal)
+            const labelOptions = '<option value="">All Labels</option>';
+            let labelHtml = labelOptions;
             labels.forEach(label => {
-                labelSelect.innerHTML += `<option value="${label}">${label}</option>`;
+                labelHtml += `<option value="${label}">${label}</option>`;
             });
+            if (labelSelect) labelSelect.innerHTML = labelHtml;
 
             // Update parent select in new issue modal
-            parentSelect.innerHTML = '<option value="">None (top-level)</option>';
-            parents.forEach(p => {
-                parentSelect.innerHTML += `<option value="${p.id}">${p.title}</option>`;
-            });
+            if (parentSelect) {
+                parentSelect.innerHTML = '<option value="">None (top-level)</option>';
+                parents.forEach(p => {
+                    parentSelect.innerHTML += `<option value="${p.id}">${p.title}</option>`;
+                });
+            }
 
             // Update assignee select in new issue modal
-            assigneeIssueSelect.innerHTML = '<option value="">Unassigned</option>';
-            USERS.forEach(user => {
-                assigneeIssueSelect.innerHTML += `<option value="${user.id}">${user.name}</option>`;
-            });
+            if (assigneeIssueSelect) {
+                assigneeIssueSelect.innerHTML = '<option value="">Unassigned</option>';
+                USERS.forEach(user => {
+                    assigneeIssueSelect.innerHTML += `<option value="${user.id}">${user.name}</option>`;
+                });
+            }
 
             // Update labels checkboxes in new issue modal
             const labelsContainer = document.getElementById('issue-labels-checkboxes');
@@ -1491,6 +1557,25 @@
             document.getElementById('new-issue-modal').classList.remove('open');
             document.getElementById('new-issue-form').reset();
             document.body.style.overflow = '';
+        }
+
+        // Filter modal
+        function openFilterModal() {
+            updateFilters();
+            document.getElementById('filter-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeFilterModal() {
+            document.getElementById('filter-modal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-status').value = '';
+            document.getElementById('filter-assignee').value = '';
+            document.getElementById('filter-label').value = '';
+            render();
         }
 
         function createIssue(event) {
