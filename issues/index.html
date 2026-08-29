@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Issues</title>
+    <title>Tasks</title>
     <style>
         :root {
             --bg: #ffffff;
@@ -152,7 +152,7 @@
         .issue-row.child {
             position: relative;
             padding-left: 0.875rem;
-            gap: 0.375rem;
+            gap: 0;
         }
 
         .child-list {
@@ -232,6 +232,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin: 0;
         }
 
         .issue-meta {
@@ -611,7 +612,7 @@
             accent-color: var(--accent);
         }
 
-        /* New Issue Modal */
+        /* New Task Modal */
         .modal-backdrop {
             position: fixed;
             inset: 0;
@@ -787,31 +788,32 @@
 </head>
 <body>
     <header class="header">
-        <h1>Issues</h1>
+        <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0;">
+            <h1 style="flex-shrink: 0;">Tasks</h1>
+            <div class="filters" style="padding: 0; background: none; border: none; flex-wrap: nowrap; gap: 0.5rem;">
+                <select class="filter-select" id="filter-status" onchange="render()" style="padding: 0.25rem 1.5rem 0.25rem 0.5rem; font-size: 0.8125rem;">
+                    <option value="">All Statuses</option>
+                    <option value="triage">Triage</option>
+                    <option value="planned">Planned</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="in-review">In Review</option>
+                    <option value="done">Done</option>
+                </select>
+                <select class="filter-select" id="filter-assignee" onchange="render()" style="padding: 0.25rem 1.5rem 0.25rem 0.5rem; font-size: 0.8125rem;">
+                    <option value="">All Assignees</option>
+                </select>
+                <select class="filter-select" id="filter-label" onchange="render()" style="padding: 0.25rem 1.5rem 0.25rem 0.5rem; font-size: 0.8125rem;">
+                    <option value="">All Labels</option>
+                </select>
+            </div>
+        </div>
         <button class="new-issue-btn" onclick="openNewIssueModal()">
-            <span>+</span> New Issue
+            <span>+</span> New Task
         </button>
     </header>
 
-    <div class="filters">
-        <select class="filter-select" id="filter-status" onchange="render()">
-            <option value="">All Statuses</option>
-            <option value="triage">Triage</option>
-            <option value="planned">Planned</option>
-            <option value="in-progress">In Progress</option>
-            <option value="in-review">In Review</option>
-            <option value="done">Done</option>
-        </select>
-        <select class="filter-select" id="filter-assignee" onchange="render()">
-            <option value="">All Assignees</option>
-        </select>
-        <select class="filter-select" id="filter-label" onchange="render()">
-            <option value="">All Labels</option>
-        </select>
-    </div>
-
     <div class="issue-list" id="issue-list">
-        <!-- Issues rendered here -->
+        <!-- Tasks rendered here -->
     </div>
 
     <!-- Detail Overlay -->
@@ -851,11 +853,11 @@
         </div>
     </div>
 
-    <!-- New Issue Modal -->
+    <!-- New Task Modal -->
     <div class="modal-backdrop" id="new-issue-modal" onclick="if(event.target === this) closeNewIssueModal()">
         <div class="modal">
             <div class="modal-header">
-                <h2>New Issue</h2>
+                <h2>New Task</h2>
                 <button class="overlay-close" onclick="closeNewIssueModal()">×</button>
             </div>
             <div class="modal-body">
@@ -886,7 +888,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="issue-parent">Parent Issue</label>
+                            <label for="issue-parent">Parent Task</label>
                             <select id="issue-parent">
                                 <option value="">None</option>
                             </select>
@@ -898,7 +900,7 @@
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeNewIssueModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create Issue</button>
+                        <button type="submit" class="btn btn-primary">Create Task</button>
                     </div>
                 </form>
             </div>
@@ -1084,7 +1086,7 @@
             });
 
             // Update parent select in new issue modal
-            parentSelect.innerHTML = '<option value="">None (top-level)</option>';
+            parentSelect.innerHTML = '<option value="">None (None (top-level))</option>';
             parents.forEach(p => {
                 parentSelect.innerHTML += `<option value="${p.id}">${p.title}</option>`;
             });
@@ -1141,8 +1143,8 @@
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <p>No issues found</p>
-                        <button class="btn btn-primary" onclick="openNewIssueModal()">Create your first issue</button>
+                        <p>No tasks found</p>
+                        <button class="btn btn-primary" onclick="openNewIssueModal()">Create your first task</button>
                     </div>
                 `;
                 return;
